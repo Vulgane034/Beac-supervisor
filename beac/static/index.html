@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BEAC — Supervision des Dossiers</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0A1628;
+  --navy2:#112040;
+  --gold:#B8960C;
+  --gold2:#D4AE2A;
+  --gold-light:#F5E9A0;
+  --blue:#1A4A8A;
+  --blue2:#2460B0;
+  --slate:#E8EDF5;
+  --bg:#F0F3F8;
+  --white:#FFFFFF;
+  --text:#0F1E35;
+  --muted:#5A6A82;
+  --border:#CDD5E3;
+  --green:#0A6B48;
+  --green-bg:#E3F5EE;
+  --amber:#9A4800;
+  --amber-bg:#FEF0D8;
+  --red:#B52B1D;
+  --red-bg:#FDECEA;
+  --sky:#1558A0;
+  --sky-bg:#E0EEFA;
+  --em:#1558A0;
+  --setsrc:#0A6B48;
+  --smp:#6830A0;
+  --radius:6px;
+  --shadow:0 2px 14px rgba(10,22,40,.10);
+  --shadow-lg:0 8px 36px rgba(10,22,40,.16);
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;overflow-x:hidden}
+
+/* ── LANDING ── */
+#landing{min-height:100vh;background:var(--navy);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.landing-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 60% 40%, #1A3A6A 0%, transparent 70%),repeating-linear-gradient(45deg,rgba(184,150,12,.03) 0px,rgba(184,150,12,.03) 1px,transparent 1px,transparent 40px);pointer-events:none}
+.landing-header{display:flex;align-items:center;justify-content:space-between;padding:28px 56px;position:relative;z-index:2}
+.land-logo{display:flex;align-items:center;gap:16px}
+.land-logo-mark{width:48px;height:48px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:800;font-size:18px;color:var(--navy);letter-spacing:-.5px;flex-shrink:0}
+.land-logo-text{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:.3px}
+.land-logo-sub{font-size:10px;color:#7A9ABF;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.land-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;text-align:center;position:relative;z-index:2}
+.land-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(184,150,12,.15);border:1px solid rgba(184,150,12,.35);border-radius:20px;padding:6px 18px;font-size:11px;font-weight:600;color:var(--gold2);letter-spacing:1px;text-transform:uppercase;margin-bottom:32px}
+.land-title{font-family:'Playfair Display',serif;font-size:clamp(38px,5vw,68px);font-weight:800;color:#fff;line-height:1.08;letter-spacing:-1px;max-width:820px;margin-bottom:20px}
+.land-title span{color:var(--gold2)}
+.land-desc{font-size:17px;font-weight:300;color:#8AAACB;max-width:560px;margin-bottom:52px;line-height:1.7}
+.land-cta{background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:16px 42px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:.25s;box-shadow:0 4px 20px rgba(184,150,12,.4)}
+.land-cta:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(184,150,12,.5)}
+.land-features{display:flex;gap:28px;margin-top:72px;flex-wrap:wrap;justify-content:center}
+.land-feat{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:24px 28px;text-align:left;min-width:200px;flex:1;max-width:240px;transition:.2s}
+.land-feat:hover{background:rgba(255,255,255,.08);border-color:rgba(184,150,12,.25)}
+.land-feat-icon{font-size:22px;margin-bottom:10px}
+.land-feat-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:6px}
+.land-feat-desc{font-size:12px;color:#7A9ABF;line-height:1.5}
+.land-footer{padding:24px 56px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}
+.land-footer-txt{font-size:11px;color:#4A6A8A;letter-spacing:.5px}
+
+/* ── APP ── */
+#app{display:none;flex-direction:column;min-height:100vh}
+.topbar{background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:58px;box-shadow:0 2px 12px rgba(0,0,0,.25);position:sticky;top:0;z-index:100}
+.topbar-brand{display:flex;align-items:center;gap:12px}
+.topbar-logo{width:34px;height:34px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:800;font-size:15px;color:var(--navy);flex-shrink:0}
+.topbar-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:#fff}
+.topbar-sub{font-size:10px;color:#7A9ABF;letter-spacing:.8px;text-transform:uppercase;margin-top:1px}
+.topbar-nav{display:flex;gap:3px}
+.nav-btn{background:transparent;border:none;color:#7A9ABF;padding:7px 14px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;transition:.18s;letter-spacing:.3px}
+.nav-btn:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-btn.active{background:var(--gold);color:var(--navy);font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-date{font-size:11px;color:#7A9ABF}
+.topbar-user{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:600}
+.back-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#7A9ABF;border-radius:4px;padding:5px 12px;font-size:11px;cursor:pointer;transition:.15s}
+.back-btn:hover{color:#fff;border-color:rgba(255,255,255,.25)}
+
+.main{flex:1;padding:28px 32px;max-width:1300px;width:100%;margin:0 auto}
+.page{display:none;animation:fadeIn .22s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PAGE HEADER ── */
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;padding-bottom:14px;border-bottom:2px solid var(--border)}
+.page-header-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--navy)}
+.page-header-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:5px;border:none;border-radius:var(--radius);padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:.18s;letter-spacing:.2px}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-primary:hover{background:var(--navy2);box-shadow:var(--shadow)}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:hover{background:var(--gold2)}
+.btn-outline{background:#fff;color:var(--navy);border:1.5px solid var(--border)}
+.btn-outline:hover{border-color:var(--blue2);color:var(--blue2)}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid #F0C0BC}
+.btn-danger:hover{background:#FAD8D4}
+.btn-success{background:var(--green-bg);color:var(--green);border:1px solid #A0D8C0}
+
+/* ── KPI STRIP ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.kpi{background:var(--white);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border-top:3px solid var(--border);transition:.2s;cursor:default}
+.kpi:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.kpi-value{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;line-height:1;letter-spacing:-1px}
+.kpi-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:4px}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── SUPERVISION ── */
+.supervision-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:26px}
+.sup-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.sup-card-head{padding:14px 18px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+.sup-card-sigle{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;letter-spacing:.5px}
+.sup-card-name{font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;opacity:.75}
+.sup-card-total{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:rgba(255,255,255,.9)}
+.sup-card-body{padding:14px 18px}
+.sup-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px;border-bottom:1px solid var(--slate)}
+.sup-row:last-child{border-bottom:none}
+.sup-row-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:7px}
+.progress-bar{height:4px;background:var(--slate);border-radius:10px;margin-top:10px;overflow:hidden}
+.progress-fill{height:100%;border-radius:10px;transition:width .6s ease}
+.alert-strip{background:var(--amber-bg);border:1px solid #F5D8A0;border-radius:var(--radius);padding:10px 16px;display:flex;align-items:center;gap:8px;margin-bottom:18px;font-size:12px;color:var(--amber)}
+
+/* ── FILTERS ── */
+.filters{background:var(--white);border-radius:var(--radius);padding:12px 18px;box-shadow:var(--shadow);display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.filter-group{display:flex;align-items:center;gap:7px}
+.filter-group label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;white-space:nowrap}
+.filter-input,.filter-select{border:1.5px solid var(--border);border-radius:var(--radius);padding:6px 11px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);background:#fff;outline:none;transition:.18s}
+.filter-input:focus,.filter-select:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(36,96,176,.09)}
+.filter-input{min-width:200px}
+.filter-sep{width:1px;height:26px;background:var(--border);flex-shrink:0}
+.filter-count{font-size:11px;color:var(--muted);font-weight:500;margin-left:auto;white-space:nowrap}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--navy);color:#fff}
+thead th{padding:10px 13px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{background:var(--navy2)}
+tbody tr{border-bottom:1px solid var(--slate);transition:background .13s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#F3F7FD}
+tbody td{padding:11px 13px;font-size:12px;vertical-align:middle}
+.ref{font-family:'Courier New',monospace;font-size:11px;color:var(--muted);font-weight:700}
+.titre-cell{font-weight:600;color:var(--text);max-width:220px}
+.titre-cell small{display:block;font-size:10px;font-weight:400;color:var(--muted);margin-top:1px}
+.actions{display:flex;gap:4px;white-space:nowrap}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:3px;border-radius:20px;padding:3px 9px;font-size:10px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.badge-attente{background:var(--amber-bg);color:var(--amber);border:1px solid #F0D090}
+.badge-cours{background:var(--sky-bg);color:var(--sky);border:1px solid #AACEEE}
+.badge-traite{background:var(--green-bg);color:var(--green);border:1px solid #90D0B8}
+.badge-rejete{background:var(--red-bg);color:var(--red);border:1px solid #F0B8B4}
+.prio-dot{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.svc-tag{display:inline-block;border-radius:3px;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:.3px}
+.svc-em{background:#E0EEF8;color:var(--em);border:1px solid #AACCEE}
+.svc-setsrc{background:var(--green-bg);color:var(--setsrc);border:1px solid #90D0B8}
+.svc-smp{background:#F0EAF8;color:var(--smp);border:1px solid #C8A8E8}
+.retard{color:var(--red);font-weight:700}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,22,40,.6);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:10px;box-shadow:0 24px 64px rgba(0,0,0,.28);width:660px;max-width:96vw;max-height:92vh;overflow:auto;animation:slideUp .22s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{background:var(--navy);color:#fff;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-radius:10px 10px 0 0}
+.modal-header-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700}
+.modal-close{background:rgba(255,255,255,.1);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.18s}
+.modal-close:hover{background:rgba(255,255,255,.22)}
+.modal-body{padding:22px}
+.modal-footer{padding:14px 22px;background:var(--slate);border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;border-radius:0 0 10px 10px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-full{grid-column:1/-1}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.form-control{border:1.5px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:#fff;outline:none;transition:.18s;width:100%}
+.form-control:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(36,96,176,.09)}
+textarea.form-control{resize:vertical;min-height:70px}
+
+/* ── DETAIL ── */
+.detail-section{margin-bottom:18px}
+.detail-section-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);padding-bottom:5px;margin-bottom:10px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-field{background:var(--slate);border-radius:var(--radius);padding:10px 13px}
+.detail-field-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px}
+.detail-field-value{font-size:13px;font-weight:600;color:var(--text)}
+.statut-buttons{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.statut-btn{border:2px solid var(--border);background:#fff;color:var(--muted);border-radius:var(--radius);padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;transition:.18s}
+.statut-btn:hover{border-color:var(--blue2);color:var(--blue2)}
+.statut-btn.selected{border-color:var(--navy);background:var(--navy);color:#fff}
+
+/* ── CHARTS ── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+.chart-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 22px}
+.chart-card-full{grid-column:1/-1}
+.chart-title{font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.chart-sub{font-size:11px;color:var(--muted);margin-bottom:16px}
+.chart-canvas-wrap{position:relative;height:210px}
+.rep-filters{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.rep-filter-btn{border:2px solid var(--border);background:#fff;color:var(--muted);border-radius:var(--radius);padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;transition:.18s}
+.rep-filter-btn:hover{border-color:var(--blue2);color:var(--blue2)}
+.rep-filter-btn.active{background:var(--navy);border-color:var(--navy);color:#fff}
+
+/* ── KPI BUILDER ── */
+.kpi-builder-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+.kpi-builder-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 24px}
+.kpi-builder-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.kpi-list{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow-y:auto}
+.kpi-item{display:flex;align-items:center;gap:10px;background:var(--slate);border-radius:var(--radius);padding:12px 14px;border-left:4px solid var(--border)}
+.kpi-item-info{flex:1}
+.kpi-item-name{font-size:13px;font-weight:700;color:var(--text)}
+.kpi-item-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.kpi-item-value{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;min-width:50px;text-align:right}
+.kpi-item-actions{display:flex;gap:5px}
+.kpi-toggle{width:38px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;border:none;position:relative;transition:.2s;flex-shrink:0}
+.kpi-toggle.on{background:var(--green)}
+.kpi-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s}
+.kpi-toggle.on::after{left:20px}
+.color-picker-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.color-chip{width:22px;height:22px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.15s}
+.color-chip.selected{border-color:var(--navy);transform:scale(1.15)}
+.formula-preview{background:var(--slate);border-radius:var(--radius);padding:8px 12px;font-size:11px;font-family:'Courier New',monospace;color:var(--blue);margin-top:8px}
+.section-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── CUSTOM KPI DISPLAY ── */
+.custom-kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .main{padding:16px 12px}
+  .supervision-grid,.charts-grid,.kpi-builder-grid{grid-template-columns:1fr}
+  .topbar{padding:0 12px}
+  .landing-header,.land-footer{padding:20px 24px}
+  .land-hero{padding:40px 20px}
+}
+@media(max-width:600px){
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .form-grid{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ════ LANDING PAGE ════ -->
+<div id="landing">
+  <div class="landing-bg"></div>
+  <div class="landing-header">
+    <div class="land-logo">
+      <div class="land-logo-mark">BC</div>
+      <div>
+        <div class="land-logo-text">Banque Centrale</div>
+        <div class="land-logo-sub">BEAC — Zone CEMAC</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#4A6A8A;letter-spacing:.5px">Accès Direction Générale</div>
+  </div>
+
+  <div class="land-hero">
+    <div class="land-badge">● Tableau de bord opérationnel</div>
+    <h1 class="land-title">Supervision des<br><span>Dossiers Administratifs</span></h1>
+    <p class="land-desc">Plateforme centralisée de suivi et de gestion des dossiers des services EM, SETSRC et SMP — conçue pour la Direction Générale.</p>
+    <button class="land-cta" onclick="enterApp()">Accéder au tableau de bord →</button>
+
+    <div class="land-features">
+      <div class="land-feat">
+        <div class="land-feat-icon">📊</div>
+        <div class="land-feat-title">Supervision en temps réel</div>
+        <div class="land-feat-desc">Vue consolidée de l'activité des trois services</div>
+      </div>
+      <div class="land-feat">
+        <div class="land-feat-icon">📁</div>
+        <div class="land-feat-title">Gestion des dossiers</div>
+        <div class="land-feat-desc">Créer, modifier, suivre et clôturer les dossiers</div>
+      </div>
+      <div class="land-feat">
+        <div class="land-feat-icon">📈</div>
+        <div class="land-feat-title">KPI personnalisables</div>
+        <div class="land-feat-desc">Créez vos propres indicateurs de performance</div>
+      </div>
+      <div class="land-feat">
+        <div class="land-feat-icon">🔔</div>
+        <div class="land-feat-title">Alertes automatiques</div>
+        <div class="land-feat-desc">Détection des retards et dossiers urgents</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="land-footer">
+    <div class="land-footer-txt">© 2026 Banque des États de l'Afrique Centrale — Usage interne</div>
+    <div class="land-footer-txt">Direction Générale · v2.0</div>
+  </div>
+</div>
+
+<!-- ════ APPLICATION ════ -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-logo">BC</div>
+      <div>
+        <div class="topbar-title">BEAC — Supervision</div>
+        <div class="topbar-sub">Direction Générale</div>
+      </div>
+    </div>
+    <div class="topbar-nav">
+      <button class="nav-btn active" onclick="showPage('supervision')">Supervision</button>
+      <button class="nav-btn" onclick="showPage('dossiers')">Dossiers</button>
+      <button class="nav-btn" onclick="showPage('reporting')">Reporting</button>
+      <button class="nav-btn" onclick="showPage('kpis')">Mes KPI</button>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-date" id="topbar-date"></span>
+      <span class="topbar-user">Direction Générale</span>
+      <button class="back-btn" onclick="goLanding()">← Accueil</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ════ PAGE SUPERVISION ════ -->
+    <div class="page active" id="page-supervision">
+      <div class="page-header">
+        <div>
+          <div class="page-header-title">Vue d'ensemble — Supervision</div>
+          <div class="page-header-sub">Suivi en temps réel de l'activité de traitement</div>
+        </div>
+        <button class="btn btn-gold" onclick="showPage('dossiers');openModal()">+ Nouveau dossier</button>
+      </div>
+      <div class="alert-strip" id="alert-retard" style="display:none">⚠️ <span id="alert-retard-msg"></span></div>
+      <div class="kpi-strip" id="sup-kpis"></div>
+      <!-- Custom KPIs -->
+      <div id="sup-custom-kpis-wrap" style="display:none">
+        <div class="section-label">Mes indicateurs personnalisés</div>
+        <div class="custom-kpi-strip" id="sup-custom-kpis"></div>
+      </div>
+      <div class="section-label">État par service</div>
+      <div class="supervision-grid" id="sup-services"></div>
+      <div class="section-label">Dossiers urgents / en retard</div>
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>Réf.</th><th>Titre</th><th>Service</th><th>Responsable</th><th>Statut</th><th>Échéance</th><th>Action</th>
+        </tr></thead>
+        <tbody id="sup-urgents-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ════ PAGE DOSSIERS ════ -->
+    <div class="page" id="page-dossiers">
+      <div class="page-header">
+        <div>
+          <div class="page-header-title">Gestion des Dossiers</div>
+          <div class="page-header-sub">Consultation, création et mise à jour</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">+ Nouveau dossier</button>
+      </div>
+      <div class="filters">
+        <div class="filter-group">
+          <label>Recherche</label>
+          <input class="filter-input" id="f-search" placeholder="Référence, titre, responsable…" oninput="renderTable()"/>
+        </div>
+        <div class="filter-sep"></div>
+        <div class="filter-group">
+          <label>Service</label>
+          <select class="filter-select" id="f-service" onchange="renderTable()">
+            <option value="">Tous</option>
+            <option value="EM">EM</option>
+            <option value="SETSRC">SETSRC</option>
+            <option value="SMP">SMP</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Statut</label>
+          <select class="filter-select" id="f-statut" onchange="renderTable()">
+            <option value="">Tous</option>
+            <option value="en_attente">En attente</option>
+            <option value="en_cours">En cours</option>
+            <option value="traite">Traité</option>
+            <option value="rejete">Rejeté</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Priorité</label>
+          <select class="filter-select" id="f-prio" onchange="renderTable()">
+            <option value="">Toutes</option>
+            <option value="urgente">Urgente</option>
+            <option value="haute">Haute</option>
+            <option value="normale">Normale</option>
+            <option value="basse">Basse</option>
+          </select>
+        </div>
+        <span class="filter-count" id="filter-count"></span>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th onclick="sortTable('ref')">Réf. ↕</th>
+          <th onclick="sortTable('titre')">Titre ↕</th>
+          <th>Service</th>
+          <th onclick="sortTable('resp')">Responsable ↕</th>
+          <th onclick="sortTable('statut')">Statut ↕</th>
+          <th onclick="sortTable('prio')">Priorité ↕</th>
+          <th onclick="sortTable('echeance')">Échéance ↕</th>
+          <th>Actions</th>
+        </tr></thead>
+        <tbody id="table-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ════ PAGE REPORTING ════ -->
+    <div class="page" id="page-reporting">
+      <div class="page-header">
+        <div>
+          <div class="page-header-title">Reporting Analytique</div>
+          <div class="page-header-sub">Indicateurs de performance par service</div>
+        </div>
+        <button class="btn btn-gold" onclick="openUploadModal()">⬆ Déposer un rapport</button>
+      </div>
+      <div class="rep-filters">
+        <button class="rep-filter-btn active" data-svc="tous" onclick="setRepFilter(this)">Tous les services</button>
+        <button class="rep-filter-btn" data-svc="EM" onclick="setRepFilter(this)">EM</button>
+        <button class="rep-filter-btn" data-svc="SETSRC" onclick="setRepFilter(this)">SETSRC</button>
+        <button class="rep-filter-btn" data-svc="SMP" onclick="setRepFilter(this)">SMP</button>
+      </div>
+      <div class="kpi-strip" id="rep-kpis"></div>
+      <div id="rep-custom-kpis-wrap" style="display:none">
+        <div class="section-label" style="margin-top:8px">Mes indicateurs personnalisés</div>
+        <div class="custom-kpi-strip" id="rep-custom-kpis"></div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card"><div class="chart-title">Répartition par statut</div><div class="chart-sub">Distribution des dossiers selon leur état</div><div class="chart-canvas-wrap"><canvas id="chart-statut"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">Répartition par priorité</div><div class="chart-sub">Niveau d'urgence du portefeuille</div><div class="chart-canvas-wrap"><canvas id="chart-prio"></canvas></div></div>
+        <div class="chart-card chart-card-full"><div class="chart-title">Statuts par service</div><div class="chart-sub">Comparaison du traitement entre EM, SETSRC et SMP</div><div class="chart-canvas-wrap" style="height:250px"><canvas id="chart-services"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">Volume par service</div><div class="chart-sub">Charge globale de chaque service</div><div class="chart-canvas-wrap"><canvas id="chart-volume"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">Taux de traitement</div><div class="chart-sub">Dossiers traités vs total</div><div class="chart-canvas-wrap"><canvas id="chart-taux"></canvas></div></div>
+      </div>
+      <!-- Documents déposés -->
+      <div class="section-label">Documents déposés par les services</div>
+      <div class="filters" style="margin-bottom:12px">
+        <div class="filter-group">
+          <label>Filtrer par service</label>
+          <select class="filter-select" id="doc-filter-service" onchange="renderDocuments()">
+            <option value="">Tous</option>
+            <option value="EM">EM</option>
+            <option value="SETSRC">SETSRC</option>
+            <option value="SMP">SMP</option>
+          </select>
+        </div>
+        <span class="filter-count" id="doc-count"></span>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>Service</th><th>Fichier</th><th>Type</th><th>Taille</th><th>Description</th><th>Déposé par</th><th>Date</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="doc-table-body"><tr><td colspan="8" style="text-align:center;padding:28px;color:#9CA3AF">Chargement…</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- ════ PAGE MES KPI ════ -->
+    <div class="page" id="page-kpis">
+      <div class="page-header">
+        <div>
+          <div class="page-header-title">Mes KPI Personnalisés</div>
+          <div class="page-header-sub">Créez et gérez vos propres indicateurs de performance</div>
+        </div>
+        <button class="btn btn-gold" onclick="openKpiModal()">+ Créer un KPI</button>
+      </div>
+
+      <div class="kpi-builder-grid">
+        <!-- Mes KPI -->
+        <div class="kpi-builder-card" style="grid-column:1/-1">
+          <div class="kpi-builder-title">📊 Indicateurs actifs</div>
+          <div class="kpi-list" id="kpi-list"></div>
+          <div id="kpi-empty" style="text-align:center;padding:40px;color:var(--muted);font-size:13px;display:none">
+            Aucun KPI créé. Cliquez sur <strong>+ Créer un KPI</strong> pour commencer.
+          </div>
+        </div>
+
+        <!-- Aperçu -->
+        <div class="kpi-builder-card" style="grid-column:1/-1">
+          <div class="kpi-builder-title">👁 Aperçu — Affichage dans les tableaux de bord</div>
+          <div class="custom-kpi-strip" id="kpi-preview"></div>
+          <div id="kpi-preview-empty" style="text-align:center;padding:24px;color:var(--muted);font-size:12px">Les KPI activés apparaîtront ici et dans les pages Supervision et Reporting.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ════ MODAL FORMULAIRE ════ -->
+<div class="modal-overlay" id="modal-form">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-header-title" id="modal-form-title">Nouveau dossier</span>
+      <button class="modal-close" onclick="closeModal('modal-form')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="form-id"/>
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Titre / Objet *</label>
+          <input class="form-control" id="form-titre" placeholder="Intitulé du dossier"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Service *</label>
+          <select class="form-control" id="form-service">
+            <option value="EM">EM — Émission Monétaire</option>
+            <option value="SETSRC">SETSRC — Transferts & Changes</option>
+            <option value="SMP">SMP — Systèmes de Paiement</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Responsable *</label>
+          <input class="form-control" id="form-resp" placeholder="Nom du responsable"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statut *</label>
+          <select class="form-control" id="form-statut">
+            <option value="en_attente">En attente</option>
+            <option value="en_cours">En cours</option>
+            <option value="traite">Traité</option>
+            <option value="rejete">Rejeté</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priorité *</label>
+          <select class="form-control" id="form-prio">
+            <option value="normale">Normale</option>
+            <option value="haute">Haute</option>
+            <option value="urgente">Urgente</option>
+            <option value="basse">Basse</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date d'échéance *</label>
+          <input class="form-control" id="form-echeance" type="date"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date de création</label>
+          <input class="form-control" id="form-creation" type="date"/>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Notes / Observations</label>
+          <textarea class="form-control" id="form-notes" placeholder="Commentaires…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-form')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveForm()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL DÉTAIL ════ -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-header-title" id="detail-ref">Détail du dossier</span>
+      <button class="modal-close" onclick="closeModal('modal-detail')">✕</button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="detail-del-btn">🗑 Supprimer</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-detail')">Fermer</button>
+      <button class="btn btn-primary" id="detail-edit-btn">✏️ Modifier</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL KPI BUILDER ════ -->
+<div class="modal-overlay" id="modal-kpi">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-header-title" id="kpi-modal-title">Créer un KPI</span>
+      <button class="modal-close" onclick="closeModal('modal-kpi')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="kpi-edit-id"/>
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Nom de l'indicateur *</label>
+          <input class="form-control" id="kpi-name" placeholder="Ex: Dossiers SMP en cours"/>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Description</label>
+          <input class="form-control" id="kpi-desc" placeholder="Courte description de l'indicateur"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Type de calcul *</label>
+          <select class="form-control" id="kpi-type" onchange="updateKpiPreview()">
+            <option value="count_statut">Nombre par statut</option>
+            <option value="count_service">Nombre par service</option>
+            <option value="count_prio">Nombre par priorité</option>
+            <option value="taux_traitement">Taux de traitement (%)</option>
+            <option value="count_retard">Dossiers en retard</option>
+            <option value="count_total">Total dossiers</option>
+            <option value="taux_service">Taux traitement d'un service (%)</option>
+          </select>
+        </div>
+        <div class="form-group" id="kpi-filter-group">
+          <label class="form-label" id="kpi-filter-label">Filtre</label>
+          <select class="form-control" id="kpi-filter" onchange="updateKpiPreview()">
+            <option value="">Tous</option>
+          </select>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Couleur de l'indicateur</label>
+          <div class="color-picker-row" id="kpi-color-picker"></div>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Aperçu</label>
+          <div class="formula-preview" id="kpi-formula-preview">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-kpi')">Annuler</button>
+      <button class="btn btn-gold" onclick="saveKpi()">✅ Enregistrer le KPI</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL UPLOAD REPORTING ════ -->
+<div class="modal-overlay" id="modal-upload">
+  <div class="modal" style="width:520px">
+    <div class="modal-header">
+      <span class="modal-header-title">⬆ Déposer un rapport</span>
+      <button class="modal-close" onclick="closeModal('modal-upload')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Service *</label>
+          <select class="form-control" id="upload-service">
+            <option value="EM">EM — Émission Monétaire</option>
+            <option value="SETSRC">SETSRC — Transferts & Changes</option>
+            <option value="SMP">SMP — Systèmes de Paiement</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Déposé par</label>
+          <input class="form-control" id="upload-by" value="Direction Générale"/>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Description</label>
+          <input class="form-control" id="upload-desc" placeholder="Ex: Rapport mensuel juin 2026"/>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Fichier * <span style="font-weight:400;color:var(--muted)">(PDF, Excel, CSV, Word — max 20 Mo)</span></label>
+          <input class="form-control" id="upload-file" type="file" accept=".pdf,.xlsx,.xls,.csv,.docx,.doc"/>
+        </div>
+        <div class="form-group form-full" id="upload-status" style="display:none">
+          <div style="background:var(--slate);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--blue)">⏳ Upload en cours…</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-upload')">Annuler</button>
+      <button class="btn btn-gold" id="upload-btn" onclick="submitUpload()">⬆ Envoyer</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const SERVICES = {
+  EM:     { nom:"Émission Monétaire",                                              couleur:"#1558A0", cls:"svc-em" },
+  SETSRC: { nom:"Études des Transferts et Suivi Réglementation des Changes",       couleur:"#0A6B48", cls:"svc-setsrc" },
+  SMP:    { nom:"Systèmes et Moyens de Paiement",                                  couleur:"#6830A0", cls:"svc-smp" },
+};
+const STATUTS = {
+  en_attente:{ label:"En attente", icon:"⏳", cls:"badge-attente", color:"#9A4800" },
+  en_cours:  { label:"En cours",   icon:"🔄", cls:"badge-cours",   color:"#1558A0" },
+  traite:    { label:"Traité",     icon:"✅", cls:"badge-traite",  color:"#0A6B48" },
+  rejete:    { label:"Rejeté",     icon:"❌", cls:"badge-rejete",  color:"#B52B1D" },
+};
+const PRIORITES = {
+  urgente:{ label:"Urgente", color:"#B52B1D" },
+  haute:  { label:"Haute",   color:"#9A4800" },
+  normale:{ label:"Normale", color:"#1558A0" },
+  basse:  { label:"Basse",   color:"#5A6A82" },
+};
+const KPI_COLORS = ["#0A1628","#1558A0","#0A6B48","#6830A0","#B8960C","#B52B1D","#9A4800","#5A6A82"];
+
+// ══════════════════════════════════════════════════════════
+// CONFIG API
+// ══════════════════════════════════════════════════════════
+// URL dynamique — s'adapte automatiquement au serveur
+const API = window.location.origin;
+
+// ── Helpers fetch ──────────────────────────────────────────
+async function apiFetch(path, options={}){
+  // Ne pas forcer Content-Type sur FormData (multipart géré par le navigateur)
+  const isFormData = options.body instanceof FormData;
+  const defaultHeaders = isFormData ? {} : { "Content-Type": "application/json" };
+  const res = await fetch(API + path, {
+    ...options,
+    headers: { ...defaultHeaders, ...(options.headers || {}) }
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({detail: res.statusText}));
+    throw new Error(err.detail || res.statusText);
+  }
+  return res.json();
+}
+
+function apiNotify(msg, ok=true){
+  const el = document.getElementById('api-toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.background = ok ? 'var(--green)' : 'var(--red)';
+  el.style.display = 'flex';
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>{ el.style.display='none'; }, 3000);
+}
+
+// ── Toast HTML injecté dynamiquement ──────────────────────
+(function(){
+  const t = document.createElement('div');
+  t.id = 'api-toast';
+  t.style.cssText = 'display:none;position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--green);color:#fff;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:600;box-shadow:0 4px 18px rgba(0,0,0,.25);align-items:center;gap:8px;max-width:360px';
+  document.body.appendChild(t);
+})();
+
+// ══════════════════════════════════════════════════════════
+// ÉTAT (mémoire — alimenté par l'API)
+// ══════════════════════════════════════════════════════════
+let dossiers   = [];
+let customKpis = [];
+let chartStatut=null, chartPrio=null, chartServices=null, chartVolume=null, chartTaux=null;
+let repFilter  = "tous";
+let sortCol    = "ref", sortAsc = true;
+
+// ── Chargement initial depuis l'API ───────────────────────
+async function loadData(){
+  try {
+    dossiers = await apiFetch("/api/dossiers/");
+  } catch(e){
+    console.error("Erreur chargement dossiers:", e);
+    apiNotify("⚠ Impossible de joindre l'API backend", false);
+    dossiers = [];
+  }
+}
+
+async function loadKpis(){
+  try {
+    customKpis = await apiFetch("/api/kpis/");
+  } catch(e){
+    console.error("Erreur chargement KPIs:", e);
+    customKpis = [];
+  }
+}
+
+// saveData / saveKpis ne font plus rien (persistance = API)
+function saveData(){}
+function saveKpis(){}
+
+// ══════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════
+async function enterApp(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').style.display='flex';
+  await loadData();
+  await loadKpis();
+  renderSupervision();
+  renderTable();
+}
+function goLanding(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('landing').style.display='flex';
+}
+async function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>{ if(b.textContent.toLowerCase().includes(id==='kpis'?'kpi':id.slice(0,4))) b.classList.add('active'); });
+  if(id==='reporting'){ await loadData(); renderReporting(); renderDocuments(); }
+  if(id==='supervision'){ await loadData(); renderSupervision(); }
+  if(id==='dossiers'){ await loadData(); renderTable(); }
+  if(id==='kpis'){ await loadKpis(); renderKpiPage(); }
+}
+
+// ══════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════
+const today = ()=>new Date().toISOString().slice(0,10);
+const isLate = d => d.echeance && new Date(d.echeance)<new Date() && d.statut!=="traite" && d.statut!=="rejete";
+const fmtDate = s => s ? new Date(s).toLocaleDateString("fr-FR") : "—";
+const fmtSize = b => b < 1024*1024 ? (b/1024).toFixed(0)+" Ko" : (b/(1024*1024)).toFixed(1)+" Mo";
+
+function badgeHtml(statut){ const s=STATUTS[statut]; return `<span class="badge ${s.cls}">${s.icon} ${s.label}</span>`; }
+function prioHtml(prio){ const p=PRIORITES[prio]; return `<span class="prio-dot" style="color:${p.color}">● ${p.label}</span>`; }
+function svcHtml(svc){ const s=SERVICES[svc]; return `<span class="svc-tag ${s.cls}">${svc}</span>`; }
+
+// ══════════════════════════════════════════════════════════
+// TABLE
+// ══════════════════════════════════════════════════════════
+function getFiltered(){
+  const s=(document.getElementById('f-search')?.value||"").toLowerCase();
+  const sv=document.getElementById('f-service')?.value||"";
+  const st=document.getElementById('f-statut')?.value||"";
+  const pr=document.getElementById('f-prio')?.value||"";
+  return dossiers.filter(d=>{
+    return (!sv||d.service===sv) && (!st||d.statut===st) && (!pr||d.prio===pr)
+      && (!s||[d.ref,d.titre,d.resp].some(v=>v.toLowerCase().includes(s)));
+  });
+}
+function sortTable(col){
+  if(sortCol===col) sortAsc=!sortAsc; else { sortCol=col; sortAsc=true; }
+  renderTable();
+}
+const PRIO_ORDER = {urgente:0,haute:1,normale:2,basse:3};
+const STATUT_ORDER = {en_cours:0,en_attente:1,traite:2,rejete:3};
+function renderTable(){
+  let list=getFiltered();
+  list.sort((a,b)=>{
+    let va=a[sortCol]||"", vb=b[sortCol]||"";
+    if(sortCol==='prio'){ va=PRIO_ORDER[va]??9; vb=PRIO_ORDER[vb]??9; return sortAsc?va-vb:vb-va; }
+    if(sortCol==='statut'){ va=STATUT_ORDER[va]??9; vb=STATUT_ORDER[vb]??9; return sortAsc?va-vb:vb-va; }
+    return sortAsc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));
+  });
+  document.getElementById('filter-count').textContent=list.length+" dossier(s)";
+  const tb=document.getElementById('table-body');
+  if(!tb) return;
+  if(!list.length){ tb.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:36px;color:#9CA3AF">Aucun dossier trouvé.</td></tr>`; return; }
+  tb.innerHTML=list.map(d=>`
+    <tr>
+      <td class="ref">${d.ref}</td>
+      <td class="titre-cell">${d.titre}<small>${SERVICES[d.service].nom}</small></td>
+      <td>${svcHtml(d.service)}</td>
+      <td>${d.resp}</td>
+      <td>${badgeHtml(d.statut)}</td>
+      <td>${prioHtml(d.prio)}</td>
+      <td class="${isLate(d)?'retard':''}">${fmtDate(d.echeance)}${isLate(d)?' ⚠️':''}</td>
+      <td><div class="actions">
+        <button class="btn btn-outline btn-sm" onclick="openDetail(${d.id})">👁</button>
+        <button class="btn btn-outline btn-sm" onclick="openEdit(${d.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteDossier(${d.id})">🗑</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// SUPERVISION
+// ══════════════════════════════════════════════════════════
+function renderSupervision(){
+  const total=dossiers.length, att=dossiers.filter(d=>d.statut==="en_attente").length,
+        enc=dossiers.filter(d=>d.statut==="en_cours").length, tra=dossiers.filter(d=>d.statut==="traite").length,
+        rej=dossiers.filter(d=>d.statut==="rejete").length, urg=dossiers.filter(d=>d.prio==="urgente").length,
+        ret=dossiers.filter(isLate).length, taux=total?Math.round(tra/total*100):0;
+  document.getElementById('sup-kpis').innerHTML=[
+    {l:"Total dossiers",v:total,c:"var(--navy)",sub:`Taux de traitement : ${taux}%`},
+    {l:"En attente",v:att,c:"#9A4800",sub:"Non démarrés"},
+    {l:"En cours",v:enc,c:"#1558A0",sub:"En progression"},
+    {l:"Traités",v:tra,c:"#0A6B48",sub:"Clôturés"},
+    {l:"Urgents",v:urg,c:"#B52B1D",sub:"Priorité urgente"},
+    {l:"En retard",v:ret,c:"#B52B1D",sub:"Échéance dépassée"},
+  ].map(k=>`<div class="kpi" style="border-top-color:${k.c}"><div class="kpi-value" style="color:${k.c}">${k.v}</div><div class="kpi-label">${k.l}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
+
+  // Custom KPIs
+  renderCustomKpiStrip('sup-custom-kpis','sup-custom-kpis-wrap', dossiers);
+
+  document.getElementById('sup-services').innerHTML=Object.entries(SERVICES).map(([key,svc])=>{
+    const ds=dossiers.filter(d=>d.service===key), tot=ds.length;
+    const ta=ds.filter(d=>d.statut==="en_attente").length, te=ds.filter(d=>d.statut==="en_cours").length;
+    const tt=ds.filter(d=>d.statut==="traite").length, tr=ds.filter(d=>d.statut==="rejete").length;
+    const taux=tot?Math.round(tt/tot*100):0;
+    return `<div class="sup-card" style="border-top:4px solid ${svc.couleur}">
+      <div class="sup-card-head" style="background:${svc.couleur}">
+        <div><div class="sup-card-sigle">${key}</div><div class="sup-card-name">${svc.nom}</div></div>
+        <div class="sup-card-total">${tot}</div>
+      </div>
+      <div class="sup-card-body">
+        <div class="sup-row"><span><span class="sup-row-dot" style="background:#9A4800"></span>En attente</span><strong>${ta}</strong></div>
+        <div class="sup-row"><span><span class="sup-row-dot" style="background:#1558A0"></span>En cours</span><strong>${te}</strong></div>
+        <div class="sup-row"><span><span class="sup-row-dot" style="background:#0A6B48"></span>Traités</span><strong>${tt}</strong></div>
+        <div class="sup-row"><span><span class="sup-row-dot" style="background:#B52B1D"></span>Rejetés</span><strong>${tr}</strong></div>
+        <div style="margin-top:10px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:4px"><span>Taux de traitement</span><strong>${taux}%</strong></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${taux}%;background:${svc.couleur}"></div></div>
+        </div>
+      </div></div>`;
+  }).join('');
+
+  const urgents=dossiers.filter(d=>d.prio==="urgente"||isLate(d));
+  const al=document.getElementById('alert-retard'), ret2=dossiers.filter(isLate).length;
+  if(ret2>0){ al.style.display='flex'; document.getElementById('alert-retard-msg').innerHTML=`<strong>${ret2} dossier(s)</strong> ont dépassé leur date d'échéance.`; }
+  else al.style.display='none';
+  const utb=document.getElementById('sup-urgents-body');
+  if(!urgents.length){ utb.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:22px;color:#9CA3AF">Aucun dossier urgent ou en retard.</td></tr>`; }
+  else utb.innerHTML=urgents.map(d=>`<tr>
+    <td class="ref">${d.ref}</td><td class="titre-cell">${d.titre}</td><td>${svcHtml(d.service)}</td>
+    <td>${d.resp}</td><td>${badgeHtml(d.statut)}</td>
+    <td class="${isLate(d)?'retard':''}">${fmtDate(d.echeance)}${isLate(d)?' ⚠️':''}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="openDetail(${d.id})">Voir</button></td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// REPORTING
+// ══════════════════════════════════════════════════════════
+function setRepFilter(btn){
+  document.querySelectorAll('.rep-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); repFilter=btn.dataset.svc; renderReporting();
+}
+function renderReporting(){
+  const subset=repFilter==="tous"?dossiers:dossiers.filter(d=>d.service===repFilter);
+  const total=subset.length, att=subset.filter(d=>d.statut==="en_attente").length,
+        enc=subset.filter(d=>d.statut==="en_cours").length, tra=subset.filter(d=>d.statut==="traite").length,
+        rej=subset.filter(d=>d.statut==="rejete").length, taux=total?Math.round(tra/total*100):0;
+  document.getElementById('rep-kpis').innerHTML=[
+    {l:"Total",v:total,c:"var(--navy)"},{l:"En attente",v:att,c:"#9A4800"},
+    {l:"En cours",v:enc,c:"#1558A0"},{l:"Traités",v:tra,c:"#0A6B48"},{l:"Taux traitement",v:taux+"%",c:"#6830A0"},
+  ].map(k=>`<div class="kpi" style="border-top-color:${k.c}"><div class="kpi-value" style="color:${k.c}">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('');
+
+  renderCustomKpiStrip('rep-custom-kpis','rep-custom-kpis-wrap', subset);
+
+  const CC={en_attente:"#F59E0B",en_cours:"#2460B0",traite:"#0A6B48",rejete:"#B52B1D"};
+  const svcKeys=Object.keys(SERVICES);
+  destroyChart(chartStatut);
+  chartStatut=new Chart(document.getElementById('chart-statut'),{type:'doughnut',data:{labels:Object.values(STATUTS).map(s=>s.label),datasets:[{data:[att,enc,tra,rej],backgroundColor:[CC.en_attente,CC.en_cours,CC.traite,CC.rejete],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}}}});
+  const pu=subset.filter(d=>d.prio==="urgente").length,ph=subset.filter(d=>d.prio==="haute").length,pn=subset.filter(d=>d.prio==="normale").length,pb=subset.filter(d=>d.prio==="basse").length;
+  destroyChart(chartPrio);
+  chartPrio=new Chart(document.getElementById('chart-prio'),{type:'doughnut',data:{labels:["Urgente","Haute","Normale","Basse"],datasets:[{data:[pu,ph,pn,pb],backgroundColor:["#B52B1D","#F59E0B","#2460B0","#8094B0"],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}}}});
+  destroyChart(chartServices);
+  chartServices=new Chart(document.getElementById('chart-services'),{type:'bar',data:{labels:svcKeys,datasets:[{label:"En attente",data:svcKeys.map(k=>dossiers.filter(d=>d.service===k&&d.statut==="en_attente").length),backgroundColor:CC.en_attente,borderRadius:2},{label:"En cours",data:svcKeys.map(k=>dossiers.filter(d=>d.service===k&&d.statut==="en_cours").length),backgroundColor:CC.en_cours,borderRadius:2},{label:"Traités",data:svcKeys.map(k=>dossiers.filter(d=>d.service===k&&d.statut==="traite").length),backgroundColor:CC.traite,borderRadius:2},{label:"Rejetés",data:svcKeys.map(k=>dossiers.filter(d=>d.service===k&&d.statut==="rejete").length),backgroundColor:CC.rejete,borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:12,weight:'bold'}}},y:{stacked:true,ticks:{stepSize:1,font:{size:10}}}},plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}}}});
+  destroyChart(chartVolume);
+  chartVolume=new Chart(document.getElementById('chart-volume'),{type:'bar',data:{labels:svcKeys,datasets:[{label:"Dossiers",data:svcKeys.map(k=>dossiers.filter(d=>d.service===k).length),backgroundColor:["#1558A0","#0A6B48","#6830A0"],borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{display:false},ticks:{font:{size:12,weight:'bold'}}},y:{ticks:{stepSize:1,font:{size:10}}}},plugins:{legend:{display:false}}}});
+  destroyChart(chartTaux);
+  chartTaux=new Chart(document.getElementById('chart-taux'),{type:'bar',data:{labels:svcKeys,datasets:[{label:"Taux (%)",data:svcKeys.map(k=>{const t=dossiers.filter(d=>d.service===k).length;return t?Math.round(dossiers.filter(d=>d.service===k&&d.statut==="traite").length/t*100):0;}),backgroundColor:["#1558A0","#0A6B48","#6830A0"],borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{display:false},ticks:{font:{size:12,weight:'bold'}}},y:{min:0,max:100,ticks:{callback:v=>v+"%",font:{size:10}}}},plugins:{legend:{display:false}}}});
+}
+function destroyChart(ch){ if(ch) ch.destroy(); }
+
+// ══════════════════════════════════════════════════════════
+// KPI PERSONNALISÉS — CALCUL
+// ══════════════════════════════════════════════════════════
+function computeKpi(kpi, dataset){
+  const d = dataset || dossiers;
+  switch(kpi.type){
+    case 'count_total': return d.length;
+    case 'count_statut': return d.filter(x=>x.statut===kpi.filter).length;
+    case 'count_service': return d.filter(x=>x.service===kpi.filter).length;
+    case 'count_prio': return d.filter(x=>x.prio===kpi.filter).length;
+    case 'count_retard': return d.filter(isLate).length;
+    case 'taux_traitement': return d.length?Math.round(d.filter(x=>x.statut==="traite").length/d.length*100):0;
+    case 'taux_service': {
+      const sv=d.filter(x=>x.service===kpi.filter);
+      return sv.length?Math.round(sv.filter(x=>x.statut==="traite").length/sv.length*100):0;
+    }
+    default: return 0;
+  }
+}
+function kpiSuffix(kpi){ return kpi.type.startsWith('taux')?"%" : ""; }
+
+function renderCustomKpiStrip(stripId, wrapId, dataset){
+  const active = customKpis.filter(k=>k.active);
+  const wrap = document.getElementById(wrapId);
+  if(!active.length){ if(wrap) wrap.style.display='none'; return; }
+  if(wrap) wrap.style.display='block';
+  const strip = document.getElementById(stripId);
+  if(!strip) return;
+  strip.innerHTML = active.map(k=>`
+    <div class="kpi" style="border-top-color:${k.color}">
+      <div class="kpi-value" style="color:${k.color}">${computeKpi(k,dataset)}${kpiSuffix(k)}</div>
+      <div class="kpi-label">${k.name}</div>
+      ${k.desc?`<div class="kpi-sub">${k.desc}</div>`:''}
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// PAGE KPI
+// ══════════════════════════════════════════════════════════
+function renderKpiPage(){
+  const list = document.getElementById('kpi-list');
+  const empty = document.getElementById('kpi-empty');
+  const preview = document.getElementById('kpi-preview');
+  const previewEmpty = document.getElementById('kpi-preview-empty');
+  if(!customKpis.length){ list.innerHTML=''; empty.style.display='block'; }
+  else {
+    empty.style.display='none';
+    list.innerHTML = customKpis.map(k=>`
+      <div class="kpi-item" style="border-left-color:${k.color}">
+        <div class="kpi-item-info">
+          <div class="kpi-item-name">${k.name}</div>
+          <div class="kpi-item-desc">${k.desc||kpiTypeLabel(k)}</div>
+        </div>
+        <div class="kpi-item-value" style="color:${k.color}">${computeKpi(k)}${kpiSuffix(k)}</div>
+        <button class="kpi-toggle ${k.active?'on':''}" title="${k.active?'Désactiver':'Activer'}" onclick="toggleKpi(${k.id})"></button>
+        <div class="kpi-item-actions">
+          <button class="btn btn-outline btn-sm" onclick="openKpiModal(${k.id})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteKpi(${k.id})">🗑</button>
+        </div>
+      </div>`).join('');
+  }
+  const active=customKpis.filter(k=>k.active);
+  if(!active.length){ preview.innerHTML=''; previewEmpty.style.display='block'; }
+  else {
+    previewEmpty.style.display='none';
+    preview.innerHTML=active.map(k=>`
+      <div class="kpi" style="border-top-color:${k.color}">
+        <div class="kpi-value" style="color:${k.color}">${computeKpi(k)}${kpiSuffix(k)}</div>
+        <div class="kpi-label">${k.name}</div>
+        ${k.desc?`<div class="kpi-sub">${k.desc}</div>`:''}
+      </div>`).join('');
+  }
+}
+
+function kpiTypeLabel(k){
+  const types={count_statut:"Nombre — statut "+k.filter,count_service:"Nombre — service "+k.filter,count_prio:"Nombre — priorité "+k.filter,taux_traitement:"Taux de traitement global",count_retard:"Dossiers en retard",count_total:"Total dossiers",taux_service:"Taux traitement — "+k.filter};
+  return types[k.type]||k.type;
+}
+async function saveKpi(){
+  const name=document.getElementById('kpi-name').value.trim();
+  if(!name){ alert("Veuillez saisir un nom pour l'indicateur."); return; }
+  const colorEl=document.querySelector('.color-chip.selected');
+  const color=colorEl?colorEl.dataset.color:KPI_COLORS[0];
+  const fid=document.getElementById('kpi-edit-id').value;
+  const payload={
+    name, desc:document.getElementById('kpi-desc').value.trim(),
+    type:document.getElementById('kpi-type').value,
+    filter:document.getElementById('kpi-filter').value,
+    color, active:true,
+  };
+  try {
+    if(fid){
+      const updated = await apiFetch(`/api/kpis/${fid}`, { method:"PUT", body:JSON.stringify(payload) });
+      customKpis = customKpis.map(k=>k.id===updated.id ? updated : k);
+      apiNotify("✅ KPI modifié");
+    } else {
+      const created = await apiFetch("/api/kpis/", { method:"POST", body:JSON.stringify(payload) });
+      customKpis.push(created);
+      apiNotify("✅ KPI créé");
+    }
+    closeModal('modal-kpi');
+    renderKpiPage();
+  } catch(e){
+    apiNotify("❌ Erreur : " + e.message, false);
+  }
+}
+
+async function toggleKpi(id){
+  const kpi = customKpis.find(k=>k.id===id);
+  if(!kpi) return;
+  try {
+    const updated = await apiFetch(`/api/kpis/${id}`, { method:"PUT", body:JSON.stringify({active:!kpi.active}) });
+    customKpis = customKpis.map(k=>k.id===id ? updated : k);
+    renderKpiPage();
+  } catch(e){
+    apiNotify("❌ Erreur : " + e.message, false);
+  }
+}
+
+async function deleteKpi(id){
+  if(!confirm("Supprimer cet indicateur ?")) return;
+  try {
+    await apiFetch(`/api/kpis/${id}`, { method:"DELETE" });
+    customKpis = customKpis.filter(k=>k.id!==id);
+    apiNotify("🗑 KPI supprimé");
+    renderKpiPage();
+  } catch(e){
+    apiNotify("❌ Erreur : " + e.message, false);
+  }
+}
+
+// ── KPI MODAL ──
+
+const KPI_TYPE_FILTERS = {
+  count_statut: Object.entries(STATUTS).map(([k,v])=>({val:k,label:v.label})),
+  count_service: Object.entries(SERVICES).map(([k,v])=>({val:k,label:k+" — "+v.nom})),
+  count_prio: Object.entries(PRIORITES).map(([k,v])=>({val:k,label:v.label})),
+  taux_service: Object.entries(SERVICES).map(([k,v])=>({val:k,label:k+" — "+v.nom})),
+  taux_traitement: [],
+  count_retard: [],
+  count_total: [],
+};
+
+function openKpiModal(id=null){
+  document.getElementById('kpi-modal-title').textContent = id?"Modifier le KPI":"Créer un KPI";
+  document.getElementById('kpi-edit-id').value = id||"";
+  const cp = document.getElementById('kpi-color-picker');
+  cp.innerHTML = KPI_COLORS.map(c=>`<div class="color-chip" style="background:${c}" data-color="${c}" onclick="selectKpiColor(this)"></div>`).join('');
+  if(id){
+    const k = customKpis.find(x=>x.id===id);
+    document.getElementById('kpi-name').value=k.name;
+    document.getElementById('kpi-desc').value=k.desc||"";
+    document.getElementById('kpi-type').value=k.type;
+    selectKpiColor(cp.querySelector(`[data-color="${k.color}"]`));
+    updateKpiFilterOptions(k.filter);
+  } else {
+    document.getElementById('kpi-name').value="";
+    document.getElementById('kpi-desc').value="";
+    document.getElementById('kpi-type').value="count_statut";
+    cp.querySelector('.color-chip').classList.add('selected');
+    updateKpiFilterOptions();
+  }
+  updateKpiPreview();
+  document.getElementById('modal-kpi').classList.add('open');
+}
+function selectKpiColor(el){
+  if(!el) return;
+  document.querySelectorAll('.color-chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  updateKpiPreview();
+}
+function updateKpiFilterOptions(selectedVal=""){
+  const type=document.getElementById('kpi-type').value;
+  const opts=KPI_TYPE_FILTERS[type]||[];
+  const sel=document.getElementById('kpi-filter');
+  const grp=document.getElementById('kpi-filter-group');
+  if(!opts.length){ grp.style.display='none'; sel.value=""; return; }
+  grp.style.display='block';
+  sel.innerHTML=opts.map(o=>`<option value="${o.val}"${o.val===selectedVal?' selected':''}>${o.label}</option>`).join('');
+  updateKpiPreview();
+}
+document.getElementById('kpi-type').addEventListener('change',()=>updateKpiFilterOptions());
+function updateKpiPreview(){
+  const type=document.getElementById('kpi-type').value;
+  const filter=document.getElementById('kpi-filter').value;
+  const colorEl=document.querySelector('.color-chip.selected');
+  const color=colorEl?colorEl.dataset.color:KPI_COLORS[0];
+  const tmpKpi={type,filter,color};
+  const val=computeKpi(tmpKpi);
+  const suffix=kpiSuffix(tmpKpi);
+  document.getElementById('kpi-formula-preview').innerHTML=
+    `Formule : <strong>${kpiTypeLabel(tmpKpi)}</strong> → Valeur actuelle : <span style="color:${color};font-size:16px;font-weight:700">${val}${suffix}</span>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// DOCUMENTS / UPLOAD
+// ══════════════════════════════════════════════════════════
+function openUploadModal(){
+  document.getElementById('upload-file').value='';
+  document.getElementById('upload-desc').value='';
+  document.getElementById('upload-status').style.display='none';
+  document.getElementById('upload-btn').disabled=false;
+  document.getElementById('modal-upload').classList.add('open');
+}
+
+async function submitUpload(){
+  const fileEl = document.getElementById('upload-file');
+  if(!fileEl.files.length){ alert("Sélectionnez un fichier."); return; }
+  const service = document.getElementById('upload-service').value;
+  const desc    = document.getElementById('upload-desc').value.trim();
+  const by      = document.getElementById('upload-by').value.trim() || "Direction Générale";
+
+  const form = new FormData();
+  form.append("service",     service);
+  form.append("description", desc);
+  form.append("uploaded_by", by);
+  form.append("file",        fileEl.files[0]);
+
+  document.getElementById('upload-status').style.display='block';
+  document.getElementById('upload-btn').disabled=true;
+
+  try {
+    await apiFetch("/api/reportings/upload", { method:"POST", body:form });
+    apiNotify("✅ Document déposé avec succès");
+    closeModal('modal-upload');
+    renderDocuments();
+  } catch(e){
+    apiNotify("❌ " + e.message, false);
+  } finally {
+    document.getElementById('upload-status').style.display='none';
+    document.getElementById('upload-btn').disabled=false;
+  }
+}
+
+const FILE_ICONS = { pdf:"📄", xlsx:"📊", xls:"📊", csv:"📋", docx:"📝", doc:"📝" };
+
+async function renderDocuments(){
+  const tb  = document.getElementById('doc-table-body');
+  const cnt = document.getElementById('doc-count');
+  if(!tb) return;
+  tb.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:22px;color:#9CA3AF">Chargement…</td></tr>`;
+  try {
+    const svc = document.getElementById('doc-filter-service')?.value || "";
+    const params = svc ? `?service=${svc}` : "";
+    const docs = await apiFetch(`/api/reportings/${params}`);
+    if(cnt) cnt.textContent = docs.length + " document(s)";
+    if(!docs.length){
+      tb.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:28px;color:#9CA3AF">Aucun document déposé.</td></tr>`;
+      return;
+    }
+    tb.innerHTML = docs.map(d=>`
+      <tr>
+        <td>${svcHtml(d.service)}</td>
+        <td style="font-weight:600;max-width:200px">${FILE_ICONS[d.file_type]||'📎'} ${d.original_name}</td>
+        <td><span style="background:var(--slate);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase">${d.file_type}</span></td>
+        <td style="color:var(--muted);font-size:11px">${fmtSize(d.file_size)}</td>
+        <td style="color:var(--muted);font-size:12px">${d.description||'—'}</td>
+        <td style="font-size:12px">${d.uploaded_by}</td>
+        <td style="font-size:11px;color:var(--muted)">${d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString("fr-FR") : '—'}</td>
+        <td><div class="actions">
+          <a class="btn btn-outline btn-sm" href="${API}/api/reportings/${d.id}/download" target="_blank" download>⬇</a>
+          <button class="btn btn-danger btn-sm" onclick="deleteDocument(${d.id})">🗑</button>
+        </div></td>
+      </tr>`).join('');
+  } catch(e){
+    tb.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:22px;color:var(--red)">Erreur : ${e.message}</td></tr>`;
+  }
+}
+
+async function deleteDocument(id){
+  if(!confirm("Supprimer ce document ?")) return;
+  try {
+    await apiFetch(`/api/reportings/${id}`, { method:"DELETE" });
+    apiNotify("🗑 Document supprimé");
+    renderDocuments();
+  } catch(e){
+    apiNotify("❌ Erreur : " + e.message, false);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// MODAL DOSSIER
+// ══════════════════════════════════════════════════════════
+function openModal(id=null){
+  const editing=id!==null;
+  document.getElementById('modal-form-title').textContent=editing?"Modifier le dossier":"Nouveau dossier";
+  if(editing){
+    const d=dossiers.find(x=>x.id===id);
+    document.getElementById('form-id').value=d.id;
+    document.getElementById('form-titre').value=d.titre;
+    document.getElementById('form-service').value=d.service;
+    document.getElementById('form-resp').value=d.resp;
+    document.getElementById('form-statut').value=d.statut;
+    document.getElementById('form-prio').value=d.prio;
+    document.getElementById('form-echeance').value=d.echeance;
+    document.getElementById('form-creation').value=d.creation;
+    document.getElementById('form-notes').value=d.notes;
+  } else {
+    ['form-id','form-titre','form-resp','form-notes'].forEach(i=>document.getElementById(i).value="");
+    document.getElementById('form-service').value="EM";
+    document.getElementById('form-statut').value="en_attente";
+    document.getElementById('form-prio').value="normale";
+    document.getElementById('form-echeance').value="";
+    document.getElementById('form-creation').value=today();
+  }
+  document.getElementById('modal-form').classList.add('open');
+}
+function openEdit(id){ openModal(id); }
+
+async function saveForm(){
+  const titre   = document.getElementById('form-titre').value.trim();
+  const resp    = document.getElementById('form-resp').value.trim();
+  const echeance= document.getElementById('form-echeance').value;
+  if(!titre||!resp||!echeance){ alert("Renseignez tous les champs obligatoires (*)."); return; }
+
+  const fid = document.getElementById('form-id').value;
+  const payload = {
+    titre, resp, echeance,
+    service : document.getElementById('form-service').value,
+    statut  : document.getElementById('form-statut').value,
+    prio    : document.getElementById('form-prio').value,
+    creation: document.getElementById('form-creation').value || today(),
+    notes   : document.getElementById('form-notes').value.trim()
+  };
+
+  try {
+    if(fid){
+      const updated = await apiFetch(`/api/dossiers/${fid}`, {
+        method: "PUT", body: JSON.stringify(payload)
+      });
+      dossiers = dossiers.map(d=>d.id===updated.id ? updated : d);
+      apiNotify("✅ Dossier modifié — " + updated.ref);
+    } else {
+      const created = await apiFetch("/api/dossiers/", {
+        method: "POST", body: JSON.stringify(payload)
+      });
+      dossiers.unshift(created);
+      apiNotify("✅ Dossier créé — " + created.ref);
+    }
+    closeModal('modal-form');
+    renderTable();
+    renderSupervision();
+  } catch(e){
+    apiNotify("❌ Erreur : " + e.message, false);
+  }
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+async function deleteDossier(id){
+  if(!confirm("Confirmer la suppression ?")) return;
+  try {
+    await apiFetch(`/api/dossiers/${id}`, { method: "DELETE" });
+    dossiers = dossiers.filter(d=>d.id!==id);
+    apiNotify("🗑 Dossier supprimé");
+    renderTable();
+    renderSupervision();
+  } catch(e){
+    apiNotify("❌ Erreur : " + e.message, false);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// MODAL DETAIL
+// ══════════════════════════════════════════════════════════
+function openDetail(id){
+  const d=dossiers.find(x=>x.id===id);
+  const svc=SERVICES[d.service];
+  document.getElementById('detail-ref').textContent=d.ref+" — "+d.titre;
+  document.getElementById('detail-body').innerHTML=`
+    <div class="detail-section">
+      <div class="detail-section-title">Identification</div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="detail-field-label">Référence</div><div class="detail-field-value" style="font-family:'Courier New',monospace">${d.ref}</div></div>
+        <div class="detail-field"><div class="detail-field-label">Service</div><div class="detail-field-value" style="color:${svc.couleur}">${d.service} — ${svc.nom}</div></div>
+        <div class="detail-field"><div class="detail-field-label">Responsable</div><div class="detail-field-value">${d.resp}</div></div>
+        <div class="detail-field"><div class="detail-field-label">Date création</div><div class="detail-field-value">${fmtDate(d.creation)}</div></div>
+        <div class="detail-field"><div class="detail-field-label">Priorité</div><div class="detail-field-value">${prioHtml(d.prio)}</div></div>
+        <div class="detail-field"><div class="detail-field-label">Échéance</div><div class="detail-field-value ${isLate(d)?'retard':''}">${fmtDate(d.echeance)}${isLate(d)?' ⚠️':''}</div></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Statut actuel</div>
+      ${badgeHtml(d.statut)}
+      <div style="margin-top:12px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Changer le statut :</div>
+      <div class="statut-buttons">${Object.entries(STATUTS).map(([k,s])=>`<button class="statut-btn${d.statut===k?' selected':''}" onclick="updateStatut(${id},'${k}',this)">${s.icon} ${s.label}</button>`).join('')}</div>
+    </div>
+    ${d.notes?`<div class="detail-section"><div class="detail-section-title">Notes</div><div style="background:var(--slate);border-radius:var(--radius);padding:12px 14px;font-size:12px;line-height:1.6;border-left:3px solid var(--border)">${d.notes}</div></div>`:''}`;
+  document.getElementById('detail-edit-btn').onclick=()=>{ closeModal('modal-detail'); openEdit(id); };
+  document.getElementById('detail-del-btn').onclick=()=>{ if(confirm("Supprimer ce dossier ?")){ deleteDossier(id); closeModal('modal-detail'); } };
+  document.getElementById('modal-detail').classList.add('open');
+}
+async function updateStatut(id,statut,btn){
+  try {
+    const updated = await apiFetch(`/api/dossiers/${id}/statut?statut=${statut}`, { method: "PATCH" });
+    dossiers = dossiers.map(d=>d.id===id ? updated : d);
+    btn.closest('.statut-buttons').querySelectorAll('.statut-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    const badgeEl=btn.closest('.modal-body').querySelector('.badge');
+    if(badgeEl) badgeEl.outerHTML=badgeHtml(statut);
+    apiNotify("✅ Statut mis à jour");
+    renderTable(); renderSupervision();
+  } catch(e){
+    apiNotify("❌ Erreur : " + e.message, false);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+document.addEventListener('click',e=>{ if(e.target.classList.contains('modal-overlay')) closeModal(e.target.id); });
+document.getElementById('topbar-date').textContent=new Date().toLocaleDateString("fr-FR",{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+</script>
+</body>
+</html>
